@@ -1,0 +1,19 @@
+&molgw
+  comment='Thioformaldehyde GW calculation'    ! an optional plain text here
+
+  scf='B3LYP'                   ! 'HF' gives Hartree-Fock
+
+  basis='cc-pV5Z'
+  auxil_basis='cc-pV5Z-RI'
+
+  postscf='G0W0'
+
+  selfenergy_state_range=20
+  frozencore='no'              ! accurate approximation: O1s will not be included
+                                ! in the RPA/GW calculation 
+
+  xyz_file = 'structure.xyz'
+  natom=2                       ! Atomic coordinates are in angstrom, unless otherwise stated
+/
+
+

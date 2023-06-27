@@ -1,0 +1,1 @@
+Some of the values provided in the paper did not match directly with the internal coordinates that were simulated. This python script converts those coordinates to be the same as those in the paper.

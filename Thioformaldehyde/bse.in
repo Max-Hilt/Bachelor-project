@@ -1,0 +1,19 @@
+&molgw
+  comment='Thioformaldehyde BSE calculation'    ! an optional plain text here
+
+  scf='B3LYP'                   ! 'HF' gives Hartree-Fock
+  read_restart='yes'    ! read the RESTART file so to skip the DFT part
+                        ! just to save time
+
+  basis='cc-pV5Z'
+  auxil_basis='cc-pV5Z-RI'
+  postscf='bse'
+  frozencore='no'
+
+  eta=0.01
+
+  xyz_file = 'structure.xyz'
+  natom=4                       ! Atomic coordinates are in angstrom, unless otherwise stated
+/
+
+

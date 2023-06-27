@@ -1,0 +1,89 @@
+#!/bin/bash
+#SBATCH --time=2-23:00:00
+#SBATCH --partition ccp20
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=16
+#SBATCH --ntasks-per-core=1
+#SBATCH --exclusive
+#SBATCH --job-name CH2S
+#SBATCH --output=log%j
+#SBATCH --error=error%j
+
+module purge
+module load python3
+module load molGW/latest
+
+ulimit -s unlimited
+
+# We make a folder where we store the results of the path that was ultimately chosen
+mkdir gradient_path
+
+for i in {0..19..1}
+   do 
+   
+      echo "Running simulation $i"
+      
+      #First we make the folder in which we store all the relevant data
+      mkdir iteration_$i
+      python3 Make_derivatives_1.py -zmat 'CO.zmat' -i $i
+      mv CO.zmat iteration_$i/CO_${i}.zmat
+      wait
+
+      for folder in iteration_${i}/*;do
+         if [ -d "$folder" ]; then
+            # We move the structure file of the current configuration and run the molgw calculations
+            mv ${folder}/structure.xyz structure.xyz
+            mpirun -np 16 molgw gw.in > gw.out
+
+            # We move a few of the files before the BSE step
+            mv molgw.yaml ${folder}/molgw_gw.yaml
+            mv gw.out ${folder}/gw.out
+
+            mpirun -np 16 molgw bse.in > bse.out 
+
+            # Now we move all the results of these simulations back into the corresponding folders
+            mv molgw.yaml ${folder}/molgw_bse.yaml
+            mv bse.out ${folder}/bse.out
+            mv RESTART ${folder}/RESTART
+            mv ENERGY_QP ${folder}/ENERGY_QP
+            mv dynamical_dipole_polarizability.dat ${folder}/dynamical_dipole_polarizability.dat
+            mv photoabsorption_cross_section.dat ${folder}/photoabsorption_cross_section.dat
+         fi
+      done
+   wait
+
+   echo "Running gradient descent script"
+   # Finally we perform gradient descent and make a new location file 
+   python3 Gradient_descent.py -id $i -ex 1
+
+   # Then we finally also run the new configuration that we are in
+   mv CO.xyz structure.xyz
+   mpirun -np 16 molgw gw.in > gw.out
+
+   # Creating the folder where we store the simulation results
+   mkdir gradient_path/step_$i
+
+   # We move a few of the files before the BSE step
+   mv molgw.yaml gradient_path/step_$i/molgw_gw.yaml
+   mv gw.out gradient_path/step_$i/gw.out
+
+   # Then we run the BSE step
+   mpirun -np 16 molgw bse.in > bse.out 
+
+   # Now we move all the results of these simulations back into the corresponding folders
+   mv molgw.yaml gradient_path/step_$i/molgw_bse.yaml
+   mv bse.out gradient_path/step_$i/bse.out
+   mv RESTART gradient_path/step_$i/RESTART
+   mv ENERGY_QP gradient_path/step_$i/ENERGY_QP
+   mv dynamical_dipole_polarizability.dat gradient_path/step_$i/dynamical_dipole_polarizability.dat
+   mv photoabsorption_cross_section.dat gradient_path/step_$i/photoabsorption_cross_section.dat
+
+   mv structure.xyz gradient_path/step_$i/CO.xyz
+
+   wait
+done
+
+
+# After the complete simulation is over we collect the data of the path we took
+python3 Get_data.py -n 20
+python3 Get_co_bondlength.py -n 20

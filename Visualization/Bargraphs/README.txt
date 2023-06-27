@@ -1,0 +1,3 @@
+The python file 'Bar_graphs.py' was used to create all of the bargraphs that are in the report. Since it is difficult to analyze the data and save it and make sure everything performed correctly these steps were not performed simultaneously. This python file has arrays filled with values obtained using other scripts and the only objective of this script is to make nice figures of that data.
+
+The titles of the various functions should be self explenatory.

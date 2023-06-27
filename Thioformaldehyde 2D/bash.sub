@@ -1,0 +1,53 @@
+#!/bin/bash
+#SBATCH --time=3-23:00:00
+#SBATCH --partition ccp22
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=16
+#SBATCH --ntasks-per-core=1
+#SBATCH --exclusive
+#SBATCH --job-name CH2S
+#SBATCH --output=log%j
+#SBATCH --error=error%j
+
+module purge
+module load python3
+module load molGW/latest
+
+ulimit -s unlimited
+
+
+for folder in Simulations/*;do
+   if [ -d "$folder" ]; then
+      echo $folder
+      
+      # We move the structure file of the current configuration and run the molgw calculations
+      mv ${folder}/structure.xyz structure.xyz
+      mpirun -np 16 molgw gw.in > gw.out
+
+      # We move a few of the files before the BSE step
+      mv molgw.yaml ${folder}/molgw_gw.yaml
+      mv gw.out ${folder}/gw.out
+
+      mpirun -np 16 molgw bse.in > bse.out 
+
+      # Now we move all the results of these simulations back into the corresponding folders
+      mv molgw.yaml ${folder}/molgw_bse.yaml
+      mv bse.out ${folder}/bse.out
+      mv RESTART ${folder}/RESTART
+      mv ENERGY_QP ${folder}/ENERGY_QP
+      mv dynamical_dipole_polarizability.dat ${folder}/dynamical_dipole_polarizability.dat
+      mv photoabsorption_cross_section.dat ${folder}/photoabsorption_cross_section.dat
+   fi
+
+   # if statement checking if 200 iterations has been achieved
+
+   # After the complete simulation is over we collect the data of the path we took
+   #python3 Get_data.py -n 100
+
+done
+
+
+
+
+
+

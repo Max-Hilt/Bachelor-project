@@ -1,0 +1,1 @@
+'Visualizing.py' contains two functions to show the convergence of the CO bondlength with the gradient descent script and a function that shows the energy at each step of the gradient descent algorithm.

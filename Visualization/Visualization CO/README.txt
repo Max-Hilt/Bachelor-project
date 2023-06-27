@@ -1,0 +1,7 @@
+'Comparing_methods_plot.py' Shows all the functional and basis combinations of DFT and GW for both the groundstate and first excited state.
+
+'Visualizing_functions.py' Is a large code that contains a lot of different funcions used to visualize the data obtained from the simulations. All functions in the code have a short explenation of what they do. This function is there as a reference but most functions are simple applications of matplotlib.pyplot
+
+!!! Known limitations: the function correct_data() is a first attempt at making ensuring that the excited state energies keep their correct labels after they cross eachother. Due to time constraints it was decided to not put more effort in solving this problem so this function is only working for 50% and consists of inefficient code. The function is able to correctly identify non degenerate lines when they cross each other. However sometimes the excitation energy lines lie ontop of eachother and a crossing of such a 'double line' causes problems for this function.
+
+'Visualizing.py' This script is used to call the functions in the Visualizing_functions.py script. The main purpose of the Visualizing.py script is to create plots and to find the minima for the CO molecule energy curves.
